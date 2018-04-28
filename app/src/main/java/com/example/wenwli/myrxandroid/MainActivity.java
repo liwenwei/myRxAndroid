@@ -2,8 +2,8 @@ package com.example.wenwli.myrxandroid;
 
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.graphics.drawable.Drawable;
 import android.support.annotation.NonNull;
+import android.support.v4.widget.SwipeRefreshLayout;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.support.v7.widget.LinearLayoutManager;
@@ -12,21 +12,22 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import rx.Observable;
 import rx.Observer;
-import rx.Scheduler;
 import rx.Subscriber;
 import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
     private RecyclerView mAppRecyclerView;
+    private SwipeRefreshLayout mSRL;
 
     private List<AppInfo> mAppInfos = new ArrayList<>();
     private AppAdapter mAdapter;
@@ -36,12 +37,31 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        mAdapter = new AppAdapter(mAppInfos);
-
+        mSRL = findViewById(R.id.pull_down_srl);
         mAppRecyclerView = findViewById(R.id.app_list);
+
+        mAdapter = new AppAdapter(mAppInfos);
         mAppRecyclerView.setHasFixedSize(true);
         mAppRecyclerView.setLayoutManager(new LinearLayoutManager(this)); // TODO: Why can't create ViewHolder without set the LayoutManager
         mAppRecyclerView.setAdapter(mAdapter);
+
+        mSRL.setOnRefreshListener(this);
+        mSRL.post(new Runnable() {
+            @Override
+            public void run() {
+                mSRL.setRefreshing(true);
+                onRefresh();
+            }
+        });
+
+    }
+
+    @Override
+    public void onRefresh() {
+        if (mAppInfos != null && mAppInfos.size() > 0) {
+            mAppInfos.clear();
+            mAdapter.notifyDataSetChanged();
+        }
 
         loadApp();
     }
@@ -72,23 +92,25 @@ public class MainActivity extends AppCompatActivity {
                 return info;
             }
         }).subscribeOn(Schedulers.io())
-        .observeOn(AndroidSchedulers.mainThread())
-        .subscribe(new Observer<AppInfo>() {
-            @Override
-            public void onCompleted() {
-                mAdapter.notifyDataSetChanged();
-            }
+                .observeOn(AndroidSchedulers.mainThread())
+                .subscribe(new Observer<AppInfo>() {
+                    @Override
+                    public void onCompleted() {
+                        mAdapter.notifyDataSetChanged();
+                        mSRL.setRefreshing(false);
+                        Toast.makeText(MainActivity.this, "Finished", Toast.LENGTH_SHORT);
+                    }
 
-            @Override
-            public void onError(Throwable e) {
+                    @Override
+                    public void onError(Throwable e) {
 
-            }
+                    }
 
-            @Override
-            public void onNext(AppInfo appInfo) {
-                mAppInfos.add(appInfo);
-            }
-        });
+                    @Override
+                    public void onNext(AppInfo appInfo) {
+                        mAppInfos.add(appInfo);
+                    }
+                });
     }
 
     private class AppHolder extends RecyclerView.ViewHolder {
