@@ -17,6 +17,8 @@ import android.widget.Toast;
 import java.util.ArrayList;
 import java.util.List;
 
+import butterknife.BindView;
+import butterknife.ButterKnife;
 import rx.Observable;
 import rx.Observer;
 import rx.Subscriber;
@@ -26,8 +28,10 @@ import rx.schedulers.Schedulers;
 
 public class MainActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
-    private RecyclerView mAppRecyclerView;
-    private SwipeRefreshLayout mSRL;
+    @BindView(R.id.app_list)
+    RecyclerView mAppRecyclerView;
+    @BindView(R.id.pull_down_srl)
+    SwipeRefreshLayout mSRL;
 
     private List<AppInfo> mAppInfos = new ArrayList<>();
     private AppAdapter mAdapter;
@@ -36,9 +40,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
-
-        mSRL = findViewById(R.id.pull_down_srl);
-        mAppRecyclerView = findViewById(R.id.app_list);
+        ButterKnife.bind(this);
 
         mAdapter = new AppAdapter(mAppInfos);
         mAppRecyclerView.setHasFixedSize(true);
@@ -113,15 +115,16 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 });
     }
 
-    private class AppHolder extends RecyclerView.ViewHolder {
+    class AppHolder extends RecyclerView.ViewHolder {
 
-        private ImageView mAppIconImageView;
-        private TextView mAppNameTextView;
+        @BindView(R.id.app_image_view)
+        ImageView mAppIconImageView;
+        @BindView(R.id.app_text_view)
+        TextView mAppNameTextView;
 
         public AppHolder(View itemView) {
             super(itemView);
-            mAppIconImageView = itemView.findViewById(R.id.app_image_view);
-            mAppNameTextView = itemView.findViewById(R.id.app_text_view);
+            ButterKnife.bind(this, itemView);
         }
 
         public void bind(AppInfo info) {
@@ -130,7 +133,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         }
     }
 
-    private class AppAdapter extends RecyclerView.Adapter<AppHolder> {
+    class AppAdapter extends RecyclerView.Adapter<AppHolder> {
 
         private List<AppInfo> mAppInfos;
 
