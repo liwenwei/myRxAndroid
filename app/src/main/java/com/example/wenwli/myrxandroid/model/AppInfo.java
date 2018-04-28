@@ -1,4 +1,4 @@
-package com.example.wenwli.myrxandroid;
+package com.example.wenwli.myrxandroid.model;
 
 import android.graphics.drawable.Drawable;
 

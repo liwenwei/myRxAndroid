@@ -14,6 +14,9 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.example.wenwli.myrxandroid.adapter.AppPackageAdapter;
+import com.example.wenwli.myrxandroid.model.AppInfo;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -34,7 +37,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
     SwipeRefreshLayout mSRL;
 
     private List<AppInfo> mAppInfos = new ArrayList<>();
-    private AppAdapter mAdapter;
+    private AppPackageAdapter mAdapter;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,7 +45,7 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
 
-        mAdapter = new AppAdapter(mAppInfos);
+        mAdapter = new AppPackageAdapter(mAppInfos);
         mAppRecyclerView.setHasFixedSize(true);
         mAppRecyclerView.setLayoutManager(new LinearLayoutManager(this)); // TODO: Why can't create ViewHolder without set the LayoutManager
         mAppRecyclerView.setAdapter(mAdapter);
@@ -115,48 +118,4 @@ public class MainActivity extends AppCompatActivity implements SwipeRefreshLayou
                 });
     }
 
-    class AppHolder extends RecyclerView.ViewHolder {
-
-        @BindView(R.id.app_image_view)
-        ImageView mAppIconImageView;
-        @BindView(R.id.app_text_view)
-        TextView mAppNameTextView;
-
-        public AppHolder(View itemView) {
-            super(itemView);
-            ButterKnife.bind(this, itemView);
-        }
-
-        public void bind(AppInfo info) {
-            mAppIconImageView.setImageDrawable(info.getAppIcon());
-            mAppNameTextView.setText(info.getAppName());
-        }
-    }
-
-    class AppAdapter extends RecyclerView.Adapter<AppHolder> {
-
-        private List<AppInfo> mAppInfos;
-
-        public AppAdapter(List<AppInfo> appInfos) {
-            mAppInfos = appInfos;
-        }
-
-        @NonNull
-        @Override
-        public AppHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-            View view = getLayoutInflater().inflate(R.layout.item_app_list, parent, false);
-            return new AppHolder(view);
-        }
-
-        @Override
-        public void onBindViewHolder(@NonNull AppHolder holder, int position) {
-            AppInfo info = mAppInfos.get(position);
-            holder.bind(info);
-        }
-
-        @Override
-        public int getItemCount() {
-            return mAppInfos.size();
-        }
-    }
 }
